@@ -65,6 +65,32 @@ serve(async (req) => {
       const tokens = await tokenResponse.json();
       const expiresAt = new Date(Date.now() + tokens.expires_in * 1000);
 
+      // Fetch available properties from GSC
+      const sitesResponse = await fetch(
+        "https://www.googleapis.com/webmasters/v3/sites",
+        {
+          headers: {
+            Authorization: `Bearer ${tokens.access_token}`,
+          },
+        }
+      );
+
+      if (!sitesResponse.ok) {
+        throw new Error("Failed to fetch GSC properties");
+      }
+
+      const sitesData = await sitesResponse.json();
+      const sites = sitesData.siteEntry || [];
+      
+      // Use the first verified property, or fallback to first available
+      const selectedSite = sites.find((s: any) => s.permissionLevel === "siteOwner") || sites[0];
+      
+      if (!selectedSite) {
+        throw new Error("No GSC properties found for this account");
+      }
+
+      const detectedPropertyUrl = selectedSite.siteUrl;
+
       // Save tokens to database
       const { error: insertError } = await supabase.from("google_tokens").insert([
         {
@@ -73,7 +99,7 @@ serve(async (req) => {
           access_token: tokens.access_token,
           refresh_token: tokens.refresh_token,
           expires_at: expiresAt.toISOString(),
-          property_url: propertyUrl,
+          property_url: detectedPropertyUrl,
         },
       ]);
 
@@ -83,7 +109,7 @@ serve(async (req) => {
       }
 
       return new Response(
-        JSON.stringify({ success: true }),
+        JSON.stringify({ success: true, propertyUrl: detectedPropertyUrl }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }

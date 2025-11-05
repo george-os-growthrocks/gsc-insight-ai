@@ -12,6 +12,10 @@ import { PageSpeedAnalyzer } from "@/components/PageSpeedAnalyzer";
 import { AutoPageSpeed } from "@/components/AutoPageSpeed";
 import { KeywordClusters } from "@/components/KeywordClusters";
 import { AiAssistant } from "@/components/AiAssistant";
+import { AutoSync } from "@/components/AutoSync";
+import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
+import { CompetitorAnalysis } from "@/components/CompetitorAnalysis";
+import { ContentBriefGenerator } from "@/components/ContentBriefGenerator";
 import { useToast } from "@/components/ui/use-toast";
 
 interface Project {
@@ -88,12 +92,16 @@ const Project = () => {
 
         <div className="container mx-auto px-4 py-8">
           <Tabs defaultValue="connect" className="w-full">
-            <TabsList className="grid w-full grid-cols-6 mb-6">
+            <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10 mb-6">
               <TabsTrigger value="connect">Connect</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="clusters">Clusters</TabsTrigger>
               <TabsTrigger value="analyzer">Analyzer</TabsTrigger>
               <TabsTrigger value="tasks">Tasks</TabsTrigger>
-              <TabsTrigger value="pagespeed">PageSpeed</TabsTrigger>
+              <TabsTrigger value="pagespeed">Speed</TabsTrigger>
+              <TabsTrigger value="competitors">Competitors</TabsTrigger>
+              <TabsTrigger value="briefs">Briefs</TabsTrigger>
+              <TabsTrigger value="sync">Sync</TabsTrigger>
               <TabsTrigger value="ai">AI</TabsTrigger>
             </TabsList>
 
@@ -102,6 +110,10 @@ const Project = () => {
                 <GscConnector projectId={project.id} />
                 <GscActionizer projectId={project.id} />
               </div>
+            </TabsContent>
+
+            <TabsContent value="analytics">
+              <AnalyticsDashboard projectId={project.id} />
             </TabsContent>
 
             <TabsContent value="clusters">
@@ -121,6 +133,18 @@ const Project = () => {
                 <AutoPageSpeed projectId={project.id} domain={project.domain} />
                 <PageSpeedAnalyzer projectId={project.id} domain={project.domain} />
               </div>
+            </TabsContent>
+
+            <TabsContent value="competitors">
+              <CompetitorAnalysis projectId={project.id} />
+            </TabsContent>
+
+            <TabsContent value="briefs">
+              <ContentBriefGenerator projectId={project.id} />
+            </TabsContent>
+
+            <TabsContent value="sync">
+              <AutoSync projectId={project.id} />
             </TabsContent>
 
             <TabsContent value="ai">

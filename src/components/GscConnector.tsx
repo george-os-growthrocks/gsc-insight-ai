@@ -42,15 +42,6 @@ export const GscConnector = ({ projectId }: Props) => {
   };
 
   const handleConnect = async () => {
-    if (!propertyUrl) {
-      toast({
-        variant: "destructive",
-        title: "Property URL required",
-        description: "Please enter your GSC property URL",
-      });
-      return;
-    }
-
     setLoading(true);
 
     try {
@@ -77,7 +68,6 @@ export const GscConnector = ({ projectId }: Props) => {
         JSON.stringify({
           projectId,
           userId: user.id,
-          propertyUrl,
           redirectUri,
         })
       );
@@ -143,18 +133,9 @@ export const GscConnector = ({ projectId }: Props) => {
 
         {!connected ? (
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="property-url">GSC Property URL</Label>
-              <Input
-                id="property-url"
-                value={propertyUrl}
-                onChange={(e) => setPropertyUrl(e.target.value)}
-                placeholder="https://example.com/ or sc-domain:example.com"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Use the exact property URL from Google Search Console
-              </p>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              Connect your Google Search Console account to automatically import data. We'll detect all available properties after authentication.
+            </p>
             <Button onClick={handleConnect} disabled={loading} className="w-full">
               {loading ? "Connecting..." : "Connect Google Search Console"}
             </Button>

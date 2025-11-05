@@ -14,6 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
+      competitors: {
+        Row: {
+          created_at: string
+          domain: string
+          id: string
+          name: string
+          project_id: string
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          id?: string
+          name: string
+          project_id: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          id?: string
+          name?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitors_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_briefs: {
+        Row: {
+          cluster_id: string | null
+          competitor_analysis: string | null
+          created_at: string
+          id: string
+          outline: Json | null
+          project_id: string
+          seo_recommendations: string | null
+          target_keyword: string
+          title: string
+          updated_at: string
+          word_count: number | null
+        }
+        Insert: {
+          cluster_id?: string | null
+          competitor_analysis?: string | null
+          created_at?: string
+          id?: string
+          outline?: Json | null
+          project_id: string
+          seo_recommendations?: string | null
+          target_keyword: string
+          title: string
+          updated_at?: string
+          word_count?: number | null
+        }
+        Update: {
+          cluster_id?: string | null
+          competitor_analysis?: string | null
+          created_at?: string
+          id?: string
+          outline?: Json | null
+          project_id?: string
+          seo_recommendations?: string | null
+          target_keyword?: string
+          title?: string
+          updated_at?: string
+          word_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_briefs_cluster_id_fkey"
+            columns: ["cluster_id"]
+            isOneToOne: false
+            referencedRelation: "keyword_clusters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_briefs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       google_tokens: {
         Row: {
           access_token: string
@@ -287,6 +376,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "seo_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sync_schedules: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          frequency: string
+          id: string
+          last_sync: string | null
+          next_sync: string | null
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          frequency?: string
+          id?: string
+          last_sync?: string | null
+          next_sync?: string | null
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          frequency?: string
+          id?: string
+          last_sync?: string | null
+          next_sync?: string | null
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sync_schedules_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
