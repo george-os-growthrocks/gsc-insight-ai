@@ -20,6 +20,7 @@ import AiInsights from "@/pages/AiInsights";
 import QueriesPage from "@/pages/QueriesPage";
 import PagesPage from "@/pages/PagesPage";
 import CannibalizationPage from "@/pages/CannibalizationPage";
+import ContentIntelligence from "@/pages/ContentIntelligence";
 import { useToast } from "@/components/ui/use-toast";
 
 interface Project {
@@ -142,6 +143,10 @@ const Project = () => {
                 <CannibalizationPage projectId={project.id} />
               </div>
             }
+          />
+          <Route
+            path="content-intelligence"
+            element={<ContentIntelligence projectId={project.id} />}
           />
           <Route
             path="keywords"

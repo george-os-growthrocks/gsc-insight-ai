@@ -35,3 +35,15 @@ verify_jwt = false
 
 [functions.gemini-cannibalization]
 verify_jwt = false
+
+[functions.firecrawl-scrape]
+verify_jwt = false
+
+[functions.firecrawl-search]
+verify_jwt = false
+
+[functions.firecrawl-crawl]
+verify_jwt = false
+
+[functions.regenerate-content]
+verify_jwt = false

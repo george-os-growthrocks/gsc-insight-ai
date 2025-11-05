@@ -214,6 +214,51 @@ export type Database = {
           },
         ]
       }
+      content_regenerations: {
+        Row: {
+          created_at: string
+          generated_at: string
+          id: string
+          improvements: Json | null
+          original_content: string
+          original_url: string
+          project_id: string
+          regenerated_content: string
+          regeneration_prompt: string
+          target_query: string
+          word_count_after: number | null
+          word_count_before: number | null
+        }
+        Insert: {
+          created_at?: string
+          generated_at?: string
+          id?: string
+          improvements?: Json | null
+          original_content: string
+          original_url: string
+          project_id: string
+          regenerated_content: string
+          regeneration_prompt: string
+          target_query: string
+          word_count_after?: number | null
+          word_count_before?: number | null
+        }
+        Update: {
+          created_at?: string
+          generated_at?: string
+          id?: string
+          improvements?: Json | null
+          original_content?: string
+          original_url?: string
+          project_id?: string
+          regenerated_content?: string
+          regeneration_prompt?: string
+          target_query?: string
+          word_count_after?: number | null
+          word_count_before?: number | null
+        }
+        Relationships: []
+      }
       google_tokens: {
         Row: {
           access_token: string
@@ -531,6 +576,45 @@ export type Database = {
         }
         Relationships: []
       }
+      scraped_content: {
+        Row: {
+          content_html: string | null
+          content_markdown: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          project_id: string
+          query: string | null
+          scraped_at: string
+          url: string
+          word_count: number | null
+        }
+        Insert: {
+          content_html?: string | null
+          content_markdown?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          project_id: string
+          query?: string | null
+          scraped_at?: string
+          url: string
+          word_count?: number | null
+        }
+        Update: {
+          content_html?: string | null
+          content_markdown?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          project_id?: string
+          query?: string | null
+          scraped_at?: string
+          url?: string
+          word_count?: number | null
+        }
+        Relationships: []
+      }
       seo_tasks: {
         Row: {
           clicks: number | null
@@ -601,6 +685,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      serp_results: {
+        Row: {
+          content_markdown: string | null
+          created_at: string
+          description: string | null
+          fetched_at: string
+          id: string
+          metadata: Json | null
+          position: number
+          project_id: string
+          query: string
+          title: string | null
+          url: string
+        }
+        Insert: {
+          content_markdown?: string | null
+          created_at?: string
+          description?: string | null
+          fetched_at?: string
+          id?: string
+          metadata?: Json | null
+          position: number
+          project_id: string
+          query: string
+          title?: string | null
+          url: string
+        }
+        Update: {
+          content_markdown?: string | null
+          created_at?: string
+          description?: string | null
+          fetched_at?: string
+          id?: string
+          metadata?: Json | null
+          position?: number
+          project_id?: string
+          query?: string
+          title?: string | null
+          url?: string
+        }
+        Relationships: []
       }
       sync_schedules: {
         Row: {

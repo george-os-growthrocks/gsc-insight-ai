@@ -13,6 +13,7 @@ import {
   Settings,
   Search,
   AlertCircle,
+  Microscope,
 } from "lucide-react";
 import {
   Sidebar,
@@ -38,6 +39,7 @@ const navItems = [
   { title: "Queries", url: "/queries", icon: Search },
   { title: "Pages", url: "/pages", icon: FileText },
   { title: "Cannibalization", url: "/cannibalization", icon: AlertCircle },
+  { title: "Content Intelligence", url: "/content-intelligence", icon: Microscope },
   { title: "GSC Connection", url: "/connect", icon: Link2 },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Keywords", url: "/keywords", icon: Hash },
