@@ -22,6 +22,7 @@ import {
   Eye,
   MousePointer,
   Target,
+  ListPlus,
 } from "lucide-react";
 import {
   Collapsible,
@@ -69,6 +70,7 @@ export default function CannibalizationPage({ projectId }: Props) {
   const [selectedCluster, setSelectedCluster] = useState<CannibalizationCluster | null>(null);
   const [actionPlanDialog, setActionPlanDialog] = useState(false);
   const [expandedClusters, setExpandedClusters] = useState<Set<string>>(new Set());
+  const [addingTask, setAddingTask] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -223,6 +225,52 @@ export default function CannibalizationPage({ projectId }: Props) {
     setExpandedClusters(newExpanded);
   };
 
+  const handleAddToTask = async (cluster: CannibalizationCluster) => {
+    try {
+      setAddingTask(true);
+
+      const supportingPagesText = cluster.supporting_pages
+        .map((p) => p.url)
+        .join(", ");
+
+      const { error } = await supabase.from("seo_tasks").insert({
+        project_id: projectId,
+        type: "cannibalization",
+        query: cluster.query,
+        page: cluster.primary_page,
+        reason: `Keyword cannibalization detected: "${cluster.query}" ranks on ${
+          cluster.supporting_pages.length + 1
+        } pages with score ${cluster.cannibalization_score.toFixed(1)}`,
+        recommendation: cluster.action_plan
+          ? cluster.action_plan.substring(0, 500)
+          : `Consolidate content from supporting pages (${supportingPagesText}) into primary page with 301 redirects`,
+        priority: Math.min(100, Math.round(cluster.cannibalization_score * 10)),
+        clicks: cluster.total_clicks,
+        impressions: cluster.total_impressions,
+        ctr: cluster.total_clicks / cluster.total_impressions,
+        position: cluster.avg_position,
+        potential_click_gain: cluster.traffic_gain_estimate,
+        status: "pending",
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Task Created",
+        description: "Cannibalization fix added to task list",
+      });
+    } catch (error) {
+      console.error("Error adding task:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create task",
+        variant: "destructive",
+      });
+    } finally {
+      setAddingTask(false);
+    }
+  };
+
   const getSeverityColor = (score: number): string => {
     if (score >= 10) return "text-red-600";
     if (score >= 5) return "text-amber-600";
@@ -357,7 +405,7 @@ export default function CannibalizationPage({ projectId }: Props) {
                     <TableHead className="text-right">Position</TableHead>
                     <TableHead className="text-right">Clicks</TableHead>
                     <TableHead className="text-right">Traffic Gain</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -398,34 +446,48 @@ export default function CannibalizationPage({ projectId }: Props) {
                             +{cluster.traffic_gain_estimate || 0}
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              size="sm"
-                              variant={cluster.action_plan ? "outline" : "default"}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (cluster.action_plan) {
-                                  setSelectedCluster(cluster);
-                                  setActionPlanDialog(true);
-                                } else {
-                                  handleGenerateActionPlan(cluster);
-                                }
-                              }}
-                              disabled={generatingPlan}
-                            >
-                              {generatingPlan && selectedCluster?.id === cluster.id ? (
-                                <RefreshCw className="h-4 w-4 animate-spin" />
-                              ) : cluster.action_plan ? (
-                                <>
-                                  <Eye className="h-4 w-4 mr-1" />
-                                  View
-                                </>
-                              ) : (
-                                <>
-                                  <Sparkles className="h-4 w-4 mr-1" />
-                                  Plan
-                                </>
-                              )}
-                            </Button>
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                size="sm"
+                                variant={cluster.action_plan ? "outline" : "default"}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (cluster.action_plan) {
+                                    setSelectedCluster(cluster);
+                                    setActionPlanDialog(true);
+                                  } else {
+                                    handleGenerateActionPlan(cluster);
+                                  }
+                                }}
+                                disabled={generatingPlan}
+                              >
+                                {generatingPlan && selectedCluster?.id === cluster.id ? (
+                                  <RefreshCw className="h-4 w-4 animate-spin" />
+                                ) : cluster.action_plan ? (
+                                  <>
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    View
+                                  </>
+                                ) : (
+                                  <>
+                                    <Sparkles className="h-4 w-4 mr-1" />
+                                    Plan
+                                  </>
+                                )}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAddToTask(cluster);
+                                }}
+                                disabled={addingTask}
+                              >
+                                <ListPlus className="h-4 w-4 mr-1" />
+                                Task
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                         <CollapsibleContent asChild>

@@ -23,6 +23,7 @@ import {
   MousePointer,
   Target,
   TrendingUp,
+  ListPlus,
 } from "lucide-react";
 import {
   Collapsible,
@@ -64,6 +65,7 @@ export default function PagesPage({ projectId }: Props) {
   const [sortField, setSortField] = useState<SortField>("performance_score");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [expandedPages, setExpandedPages] = useState<Set<string>>(new Set());
+  const [addingTask, setAddingTask] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -192,6 +194,71 @@ export default function PagesPage({ projectId }: Props) {
       newExpanded.add(pageUrl);
     }
     setExpandedPages(newExpanded);
+  };
+
+  const handleAddToTask = async (page: PageAnalysis) => {
+    try {
+      setAddingTask(true);
+
+      const topQueries = page.queries
+        .sort((a, b) => b.impressions - a.impressions)
+        .slice(0, 3)
+        .map((q) => q.query)
+        .join(", ");
+
+      let taskType = "optimization";
+      let reason = "";
+      let recommendation = "";
+
+      if (page.performance_score < 50) {
+        taskType = "low_performance";
+        reason = `Page has low performance score (${page.performance_score}) with ${page.total_clicks} clicks and position ${page.avg_position.toFixed(1)}`;
+        recommendation = `Improve content quality, optimize for target keywords (${topQueries}), and enhance on-page SEO elements`;
+      } else if (page.avg_position > 10) {
+        taskType = "content_gap";
+        reason = `Page ranks outside top 10 (position ${page.avg_position.toFixed(1)}) for ${page.queries.length} queries`;
+        recommendation = `Create comprehensive content targeting: ${topQueries}. Analyze top-ranking competitors and fill content gaps`;
+      } else if (page.avg_ctr < 0.05) {
+        taskType = "ctr_optimization";
+        reason = `Page has low CTR (${(page.avg_ctr * 100).toFixed(2)}%) at position ${page.avg_position.toFixed(1)}`;
+        recommendation = `Optimize title tags and meta descriptions for queries: ${topQueries}`;
+      } else {
+        reason = `Optimize page performance for ${page.queries.length} ranking queries`;
+        recommendation = `Focus on improving rankings for: ${topQueries}`;
+      }
+
+      const { error } = await supabase.from("seo_tasks").insert({
+        project_id: projectId,
+        type: taskType,
+        page: page.page_url,
+        query: topQueries,
+        reason,
+        recommendation,
+        priority: Math.round(100 - page.performance_score),
+        clicks: page.total_clicks,
+        impressions: page.total_impressions,
+        ctr: page.avg_ctr,
+        position: page.avg_position,
+        expected_ctr: page.avg_ctr * 1.5,
+        status: "pending",
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Task Created",
+        description: "Page optimization task added to your list",
+      });
+    } catch (error) {
+      console.error("Error adding task:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create task",
+        variant: "destructive",
+      });
+    } finally {
+      setAddingTask(false);
+    }
   };
 
   const getScoreColor = (score: number): string => {
@@ -365,6 +432,7 @@ export default function PagesPage({ projectId }: Props) {
                       <SortButton field="avg_position">Position</SortButton>
                     </TableHead>
                     <TableHead className="text-right">Queries</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -409,11 +477,25 @@ export default function PagesPage({ projectId }: Props) {
                           <TableCell className="text-right">
                             <Badge variant="outline">{page.queries.length}</Badge>
                           </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddToTask(page);
+                              }}
+                              disabled={addingTask}
+                            >
+                              <ListPlus className="h-4 w-4 mr-1" />
+                              Task
+                            </Button>
+                          </TableCell>
                         </TableRow>
                         {page.queries.length > 0 && (
                           <CollapsibleContent asChild>
                             <TableRow>
-                              <TableCell colSpan={7} className="bg-muted/30 p-4">
+                              <TableCell colSpan={8} className="bg-muted/30 p-4">
                                 <div className="space-y-3">
                                   <div className="flex items-center justify-between mb-3">
                                     <p className="text-sm font-semibold">
