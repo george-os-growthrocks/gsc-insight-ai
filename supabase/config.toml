@@ -29,3 +29,9 @@ verify_jwt = false
 
 [functions.analyze-pages]
 verify_jwt = false
+
+[functions.detect-cannibalization]
+verify_jwt = false
+
+[functions.gemini-cannibalization]
+verify_jwt = false

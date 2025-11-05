@@ -12,6 +12,7 @@ import {
   Bot,
   Settings,
   Search,
+  AlertCircle,
 } from "lucide-react";
 import {
   Sidebar,
@@ -34,6 +35,7 @@ const navItems = [
   { title: "AI Insights", url: "/ai-insights", icon: Bot },
   { title: "Queries", url: "/queries", icon: Search },
   { title: "Pages", url: "/pages", icon: FileText },
+  { title: "Cannibalization", url: "/cannibalization", icon: AlertCircle },
   { title: "GSC Connection", url: "/connect", icon: Link2 },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Keywords", url: "/keywords", icon: Hash },

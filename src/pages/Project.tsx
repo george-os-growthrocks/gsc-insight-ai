@@ -19,6 +19,7 @@ import { ContentBriefGenerator } from "@/components/ContentBriefGenerator";
 import AiInsights from "@/pages/AiInsights";
 import QueriesPage from "@/pages/QueriesPage";
 import PagesPage from "@/pages/PagesPage";
+import CannibalizationPage from "@/pages/CannibalizationPage";
 import { useToast } from "@/components/ui/use-toast";
 
 interface Project {
@@ -131,6 +132,14 @@ const Project = () => {
             element={
               <div className="p-8">
                 <PagesPage projectId={project.id} />
+              </div>
+            }
+          />
+          <Route
+            path="cannibalization"
+            element={
+              <div className="p-8">
+                <CannibalizationPage projectId={project.id} />
               </div>
             }
           />
