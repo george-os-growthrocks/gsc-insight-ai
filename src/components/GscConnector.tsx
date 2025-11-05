@@ -23,9 +23,12 @@ export const GscConnector = ({ projectId }: Props) => {
   const [fetching, setFetching] = useState(false);
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
+  const [pendingConnection, setPendingConnection] = useState<any>(null);
+  const [selectedProperty, setSelectedProperty] = useState("");
 
   useEffect(() => {
     checkConnection();
+    checkPendingConnection();
   }, [projectId]);
 
   const checkConnection = async () => {
@@ -38,6 +41,56 @@ export const GscConnector = ({ projectId }: Props) => {
     if (data) {
       setConnected(true);
       setPropertyUrl(data.property_url);
+    }
+  };
+
+  const checkPendingConnection = () => {
+    const pending = sessionStorage.getItem("gsc_pending_connection");
+    if (pending) {
+      const data = JSON.parse(pending);
+      if (data.projectId === projectId) {
+        setPendingConnection(data);
+      }
+    }
+  };
+
+  const handlePropertySelect = async () => {
+    if (!selectedProperty || !pendingConnection) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke("gsc-oauth", {
+        body: {
+          action: "save_connection",
+          projectId: pendingConnection.projectId,
+          userId: pendingConnection.userId,
+          propertyUrl: selectedProperty,
+          accessToken: pendingConnection.tokens.access_token,
+          refreshToken: pendingConnection.tokens.refresh_token,
+          expiresIn: pendingConnection.tokens.expires_in,
+        },
+      });
+
+      if (error) throw error;
+
+      sessionStorage.removeItem("gsc_pending_connection");
+      setPendingConnection(null);
+      setSelectedProperty("");
+      
+      toast({
+        title: "Connection saved!",
+        description: `Connected to ${selectedProperty}`,
+      });
+
+      await checkConnection();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Failed to save connection",
+        description: error.message,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -131,10 +184,37 @@ export const GscConnector = ({ projectId }: Props) => {
           {connected && <CheckCircle2 className="h-5 w-5 text-green-500 ml-auto" />}
         </div>
 
-        {!connected ? (
+        {pendingConnection ? (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Connect your Google Search Console account to automatically import data. We'll detect all available properties after authentication.
+              Select which property you want to connect:
+            </p>
+            <div className="space-y-2">
+              {pendingConnection.properties.map((prop: any) => (
+                <label key={prop.siteUrl} className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:bg-muted">
+                  <input
+                    type="radio"
+                    name="property"
+                    value={prop.siteUrl}
+                    checked={selectedProperty === prop.siteUrl}
+                    onChange={(e) => setSelectedProperty(e.target.value)}
+                    className="h-4 w-4"
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium">{prop.siteUrl}</p>
+                    <p className="text-xs text-muted-foreground">{prop.permissionLevel}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+            <Button onClick={handlePropertySelect} disabled={!selectedProperty || loading} className="w-full">
+              {loading ? "Connecting..." : "Connect Selected Property"}
+            </Button>
+          </div>
+        ) : !connected ? (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Connect your Google Search Console account to automatically import data. You'll be able to select from all available properties.
             </p>
             <Button onClick={handleConnect} disabled={loading} className="w-full">
               {loading ? "Connecting..." : "Connect Google Search Console"}

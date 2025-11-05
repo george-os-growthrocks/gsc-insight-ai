@@ -63,7 +63,6 @@ serve(async (req) => {
       }
 
       const tokens = await tokenResponse.json();
-      const expiresAt = new Date(Date.now() + tokens.expires_in * 1000);
 
       // Fetch available properties from GSC
       const sitesResponse = await fetch(
@@ -82,24 +81,43 @@ serve(async (req) => {
       const sitesData = await sitesResponse.json();
       const sites = sitesData.siteEntry || [];
       
-      // Use the first verified property, or fallback to first available
-      const selectedSite = sites.find((s: any) => s.permissionLevel === "siteOwner") || sites[0];
-      
-      if (!selectedSite) {
+      if (!sites || sites.length === 0) {
         throw new Error("No GSC properties found for this account");
       }
 
-      const detectedPropertyUrl = selectedSite.siteUrl;
+      // Return tokens and properties list for user to select
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          properties: sites.map((s: any) => ({
+            siteUrl: s.siteUrl,
+            permissionLevel: s.permissionLevel
+          })),
+          tokens: {
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token,
+            expires_in: tokens.expires_in
+          }
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
 
-      // Save tokens to database
+    if (action === "save_connection") {
+      // Save the selected property connection
+      const { accessToken, refreshToken, expiresIn } = await req.json();
+      const expiresAt = new Date(Date.now() + expiresIn * 1000);
+
       const { error: insertError } = await supabase.from("google_tokens").insert([
         {
           user_id: userId,
           project_id: projectId,
-          access_token: tokens.access_token,
-          refresh_token: tokens.refresh_token,
+          access_token: accessToken,
+          refresh_token: refreshToken,
           expires_at: expiresAt.toISOString(),
-          property_url: detectedPropertyUrl,
+          property_url: propertyUrl,
         },
       ]);
 
@@ -109,7 +127,7 @@ serve(async (req) => {
       }
 
       return new Response(
-        JSON.stringify({ success: true, propertyUrl: detectedPropertyUrl }),
+        JSON.stringify({ success: true }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }

@@ -46,23 +46,41 @@ const GscCallback = () => {
       const state = JSON.parse(stateJson);
       sessionStorage.removeItem("gsc_oauth_state");
 
-      // Exchange code for tokens
-      const { error: exchangeError } = await supabase.functions.invoke("gsc-oauth", {
+      // Exchange code for tokens and get properties
+      const { data, error: invokeError } = await supabase.functions.invoke("gsc-oauth", {
         body: {
           action: "exchange_code",
           code,
           projectId: state.projectId,
           userId: state.userId,
-          propertyUrl: state.propertyUrl,
           redirectUri: state.redirectUri,
         },
       });
 
-      if (exchangeError) throw exchangeError;
+      if (invokeError || !data?.success) {
+        toast({
+          variant: "destructive",
+          title: "Authentication failed",
+          description: invokeError?.message || "Failed to connect Google Search Console",
+        });
+        navigate("/dashboard");
+        return;
+      }
+
+      // Store properties and tokens for selection
+      sessionStorage.setItem(
+        "gsc_pending_connection",
+        JSON.stringify({
+          projectId: state.projectId,
+          userId: state.userId,
+          properties: data.properties,
+          tokens: data.tokens,
+        })
+      );
 
       toast({
-        title: "Connected!",
-        description: "Google Search Console connected successfully",
+        title: "Authentication successful!",
+        description: "Please select a property to connect",
       });
 
       navigate(`/project/${state.projectId}`);
