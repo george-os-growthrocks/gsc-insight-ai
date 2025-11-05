@@ -30,6 +30,7 @@ interface Props {
 
 const navItems = [
   { title: "Dashboard", url: "", icon: LayoutDashboard },
+  { title: "AI Insights", url: "/ai-insights", icon: Bot },
   { title: "GSC Connection", url: "/connect", icon: Link2 },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Keywords", url: "/keywords", icon: Hash },

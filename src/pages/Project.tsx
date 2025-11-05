@@ -16,6 +16,7 @@ import { AutoSync } from "@/components/AutoSync";
 import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { CompetitorAnalysis } from "@/components/CompetitorAnalysis";
 import { ContentBriefGenerator } from "@/components/ContentBriefGenerator";
+import AiInsights from "@/pages/AiInsights";
 import { useToast } from "@/components/ui/use-toast";
 
 interface Project {
@@ -78,6 +79,14 @@ const Project = () => {
       >
         <Routes>
           <Route index element={<ProjectDashboard projectId={project.id} />} />
+          <Route
+            path="ai-insights"
+            element={
+              <div className="p-8">
+                <AiInsights projectId={project.id} />
+              </div>
+            }
+          />
           <Route
             path="connect"
             element={

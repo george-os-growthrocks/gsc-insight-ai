@@ -14,6 +14,117 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_insights: {
+        Row: {
+          created_at: string
+          current_ctr: number | null
+          current_position: number | null
+          description: string
+          effort_level: string
+          expected_ctr: number | null
+          expected_position: number | null
+          expected_traffic_gain: number | null
+          id: string
+          impact_score: number
+          insight_type: string
+          metadata: Json | null
+          page: string | null
+          priority_score: number
+          project_id: string
+          query: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          current_ctr?: number | null
+          current_position?: number | null
+          description: string
+          effort_level: string
+          expected_ctr?: number | null
+          expected_position?: number | null
+          expected_traffic_gain?: number | null
+          id?: string
+          impact_score: number
+          insight_type: string
+          metadata?: Json | null
+          page?: string | null
+          priority_score: number
+          project_id: string
+          query?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          current_ctr?: number | null
+          current_position?: number | null
+          description?: string
+          effort_level?: string
+          expected_ctr?: number | null
+          expected_position?: number | null
+          expected_traffic_gain?: number | null
+          id?: string
+          impact_score?: number
+          insight_type?: string
+          metadata?: Json | null
+          page?: string | null
+          priority_score?: number
+          project_id?: string
+          query?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      cannibalization_clusters: {
+        Row: {
+          action_plan: string | null
+          avg_position: number
+          cannibalization_score: number
+          created_at: string
+          expected_ctr: number | null
+          id: string
+          keyword_difficulty: number | null
+          primary_page: string
+          project_id: string
+          query: string
+          supporting_pages: Json
+          total_clicks: number
+          total_impressions: number
+          traffic_gain_estimate: number | null
+        }
+        Insert: {
+          action_plan?: string | null
+          avg_position: number
+          cannibalization_score: number
+          created_at?: string
+          expected_ctr?: number | null
+          id?: string
+          keyword_difficulty?: number | null
+          primary_page: string
+          project_id: string
+          query: string
+          supporting_pages: Json
+          total_clicks?: number
+          total_impressions?: number
+          traffic_gain_estimate?: number | null
+        }
+        Update: {
+          action_plan?: string | null
+          avg_position?: number
+          cannibalization_score?: number
+          created_at?: string
+          expected_ctr?: number | null
+          id?: string
+          keyword_difficulty?: number | null
+          primary_page?: string
+          project_id?: string
+          query?: string
+          supporting_pages?: Json
+          total_clicks?: number
+          total_impressions?: number
+          traffic_gain_estimate?: number | null
+        }
+        Relationships: []
+      }
       competitors: {
         Row: {
           created_at: string
@@ -194,14 +305,64 @@ export type Database = {
           },
         ]
       }
+      internal_link_opportunities: {
+        Row: {
+          anchor_text_suggestions: Json
+          created_at: string
+          expected_impact: string | null
+          from_page: string
+          from_page_clicks: number
+          id: string
+          opportunity_score: number
+          project_id: string
+          shared_queries: Json
+          to_page: string
+          to_page_position: number
+          topical_overlap: number
+        }
+        Insert: {
+          anchor_text_suggestions: Json
+          created_at?: string
+          expected_impact?: string | null
+          from_page: string
+          from_page_clicks: number
+          id?: string
+          opportunity_score: number
+          project_id: string
+          shared_queries: Json
+          to_page: string
+          to_page_position: number
+          topical_overlap: number
+        }
+        Update: {
+          anchor_text_suggestions?: Json
+          created_at?: string
+          expected_impact?: string | null
+          from_page?: string
+          from_page_clicks?: number
+          id?: string
+          opportunity_score?: number
+          project_id?: string
+          shared_queries?: Json
+          to_page?: string
+          to_page_position?: number
+          topical_overlap?: number
+        }
+        Relationships: []
+      }
       keyword_clusters: {
         Row: {
           avg_position: number | null
           cluster_name: string
           created_at: string
+          expected_ctr: number | null
           id: string
+          intent: string | null
+          keyword_difficulty: number | null
           keywords: string[]
+          priority_score: number | null
           project_id: string
+          similarity_threshold: number | null
           topic_score: number | null
           total_clicks: number | null
           total_impressions: number | null
@@ -210,9 +371,14 @@ export type Database = {
           avg_position?: number | null
           cluster_name: string
           created_at?: string
+          expected_ctr?: number | null
           id?: string
+          intent?: string | null
+          keyword_difficulty?: number | null
           keywords: string[]
+          priority_score?: number | null
           project_id: string
+          similarity_threshold?: number | null
           topic_score?: number | null
           total_clicks?: number | null
           total_impressions?: number | null
@@ -221,9 +387,14 @@ export type Database = {
           avg_position?: number | null
           cluster_name?: string
           created_at?: string
+          expected_ctr?: number | null
           id?: string
+          intent?: string | null
+          keyword_difficulty?: number | null
           keywords?: string[]
+          priority_score?: number | null
           project_id?: string
+          similarity_threshold?: number | null
           topic_score?: number | null
           total_clicks?: number | null
           total_impressions?: number | null
@@ -237,6 +408,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      page_analysis: {
+        Row: {
+          avg_ctr: number
+          avg_position: number
+          content_quality_score: number | null
+          created_at: string
+          id: string
+          page_url: string
+          performance_score: number
+          project_id: string
+          queries: Json
+          seo_metrics: Json | null
+          total_clicks: number
+          total_impressions: number
+          updated_at: string
+        }
+        Insert: {
+          avg_ctr: number
+          avg_position: number
+          content_quality_score?: number | null
+          created_at?: string
+          id?: string
+          page_url: string
+          performance_score: number
+          project_id: string
+          queries: Json
+          seo_metrics?: Json | null
+          total_clicks?: number
+          total_impressions?: number
+          updated_at?: string
+        }
+        Update: {
+          avg_ctr?: number
+          avg_position?: number
+          content_quality_score?: number | null
+          created_at?: string
+          id?: string
+          page_url?: string
+          performance_score?: number
+          project_id?: string
+          queries?: Json
+          seo_metrics?: Json | null
+          total_clicks?: number
+          total_impressions?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       pagespeed_metrics: {
         Row: {
