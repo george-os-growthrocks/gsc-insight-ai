@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, TrendingUp, Eye, MousePointerClick } from "lucide-react";
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export const ProjectDashboard = ({ projectId }: Props) => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalQueries: 0,
     avgPosition: 0,
@@ -119,21 +121,30 @@ export const ProjectDashboard = ({ projectId }: Props) => {
           <CardDescription>Common tasks to improve your SEO</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border-dashed cursor-pointer hover:bg-muted/50 transition-colors">
+          <Card 
+            className="border-dashed cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => navigate(`/project/${projectId}/sync`)}
+          >
             <CardContent className="p-6 text-center">
               <Activity className="h-8 w-8 mx-auto mb-2 text-primary" />
               <p className="font-medium">Sync GSC Data</p>
               <p className="text-xs text-muted-foreground mt-1">Get latest search data</p>
             </CardContent>
           </Card>
-          <Card className="border-dashed cursor-pointer hover:bg-muted/50 transition-colors">
+          <Card 
+            className="border-dashed cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => navigate(`/project/${projectId}/keywords`)}
+          >
             <CardContent className="p-6 text-center">
               <TrendingUp className="h-8 w-8 mx-auto mb-2 text-primary" />
               <p className="font-medium">Analyze Keywords</p>
               <p className="text-xs text-muted-foreground mt-1">Find opportunities</p>
             </CardContent>
           </Card>
-          <Card className="border-dashed cursor-pointer hover:bg-muted/50 transition-colors">
+          <Card 
+            className="border-dashed cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => navigate(`/project/${projectId}/briefs`)}
+          >
             <CardContent className="p-6 text-center">
               <MousePointerClick className="h-8 w-8 mx-auto mb-2 text-primary" />
               <p className="font-medium">Generate Brief</p>

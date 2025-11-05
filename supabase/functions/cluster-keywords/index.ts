@@ -62,28 +62,44 @@ function clusterKeywords(
     return { ...q, vector };
   });
 
-  // Simple agglomerative clustering
-  const clusters: Array<typeof vectors> = vectors.map((v) => [v]);
-  const threshold = 0.5;
+  // Limit queries to top 500 by impressions to avoid timeout
+  const topQueries = queries
+    .sort((a, b) => b.impressions - a.impressions)
+    .slice(0, 500);
 
-  while (clusters.length > 1) {
+  const limitedVectors = vectors
+    .filter((v) => topQueries.some((q) => q.query === v.query))
+    .slice(0, 500);
+
+  // Simple agglomerative clustering with optimizations
+  const clusters: Array<typeof limitedVectors> = limitedVectors.map((v) => [v]);
+  const threshold = 0.5;
+  const maxClusters = 50; // Stop early if we reach a reasonable number
+
+  // Limit iterations to prevent timeout
+  let iterations = 0;
+  const maxIterations = 100;
+
+  while (clusters.length > maxClusters && iterations < maxIterations) {
+    iterations++;
     let maxSim = -1;
     let mergeIdx1 = -1;
     let mergeIdx2 = -1;
 
-    // Find most similar clusters
-    for (let i = 0; i < clusters.length; i++) {
-      for (let j = i + 1; j < clusters.length; j++) {
-        // Average linkage
+    // Find most similar clusters (limited search)
+    for (let i = 0; i < Math.min(clusters.length, 50); i++) {
+      for (let j = i + 1; j < Math.min(clusters.length, 50); j++) {
+        // Sample-based similarity for speed
+        const sampleSize = Math.min(3, Math.min(clusters[i].length, clusters[j].length));
         let totalSim = 0;
-        let count = 0;
-        for (const v1 of clusters[i]) {
-          for (const v2 of clusters[j]) {
-            totalSim += cosineSimilarity(v1.vector, v2.vector);
-            count++;
-          }
+        
+        for (let k = 0; k < sampleSize; k++) {
+          const v1 = clusters[i][k % clusters[i].length];
+          const v2 = clusters[j][k % clusters[j].length];
+          totalSim += cosineSimilarity(v1.vector, v2.vector);
         }
-        const avgSim = totalSim / count;
+        
+        const avgSim = totalSim / sampleSize;
 
         if (avgSim > maxSim) {
           maxSim = avgSim;
@@ -99,6 +115,8 @@ function clusterKeywords(
     clusters[mergeIdx1] = [...clusters[mergeIdx1], ...clusters[mergeIdx2]];
     clusters.splice(mergeIdx2, 1);
   }
+
+  console.log(`Clustering completed in ${iterations} iterations`);
 
   // Format results
   return clusters
