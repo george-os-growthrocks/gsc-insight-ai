@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      google_tokens: {
+        Row: {
+          access_token: string
+          created_at: string
+          expires_at: string
+          id: string
+          project_id: string
+          property_url: string
+          refresh_token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          project_id: string
+          property_url: string
+          refresh_token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          project_id?: string
+          property_url?: string
+          refresh_token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_tokens_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gsc_queries: {
         Row: {
           clicks: number
@@ -54,6 +98,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "gsc_queries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      keyword_clusters: {
+        Row: {
+          avg_position: number | null
+          cluster_name: string
+          created_at: string
+          id: string
+          keywords: string[]
+          project_id: string
+          topic_score: number | null
+          total_clicks: number | null
+          total_impressions: number | null
+        }
+        Insert: {
+          avg_position?: number | null
+          cluster_name: string
+          created_at?: string
+          id?: string
+          keywords: string[]
+          project_id: string
+          topic_score?: number | null
+          total_clicks?: number | null
+          total_impressions?: number | null
+        }
+        Update: {
+          avg_position?: number | null
+          cluster_name?: string
+          created_at?: string
+          id?: string
+          keywords?: string[]
+          project_id?: string
+          topic_score?: number | null
+          total_clicks?: number | null
+          total_impressions?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "keyword_clusters_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"

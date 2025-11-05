@@ -5,3 +5,15 @@ verify_jwt = false
 
 [functions.analyze-page]
 verify_jwt = false
+
+[functions.pagespeed-fetch]
+verify_jwt = false
+
+[functions.gsc-oauth]
+verify_jwt = false
+
+[functions.gsc-fetch-data]
+verify_jwt = false
+
+[functions.cluster-keywords]
+verify_jwt = false
