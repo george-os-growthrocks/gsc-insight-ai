@@ -46,13 +46,19 @@ export const AutoPageSpeed = ({ projectId, domain }: Props) => {
       return;
     }
 
+    // Normalize URL - add https:// if no protocol
+    let normalizedUrl = url.trim();
+    if (!normalizedUrl.match(/^https?:\/\//i)) {
+      normalizedUrl = `https://${normalizedUrl}`;
+    }
+
     setLoading(true);
     setMetrics(null);
 
     try {
       const { data, error } = await supabase.functions.invoke("pagespeed-fetch", {
         body: {
-          url,
+          url: normalizedUrl,
           strategy,
           projectId,
         },

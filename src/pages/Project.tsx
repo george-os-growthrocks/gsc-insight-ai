@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Routes, Route, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthGuard } from "@/components/AuthGuard";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Search } from "lucide-react";
+import { ProjectLayout } from "@/components/ProjectLayout";
+import { ProjectDashboard } from "@/pages/ProjectDashboard";
+import { ProjectSettings } from "@/pages/ProjectSettings";
 import { GscActionizer } from "@/components/GscActionizer";
 import { GscConnector } from "@/components/GscConnector";
 import { TaskManager } from "@/components/TaskManager";
@@ -71,88 +71,147 @@ const Project = () => {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
-        <div className="border-b bg-card">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
-              <div className="flex items-center gap-2">
-                <Search className="h-5 w-5 text-primary" />
-                <h1 className="text-xl font-bold">{project.name}</h1>
-                {project.domain && (
-                  <span className="text-sm text-muted-foreground">· {project.domain}</span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="container mx-auto px-4 py-8">
-          <Tabs defaultValue="connect" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10 mb-6">
-              <TabsTrigger value="connect">Connect</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="clusters">Clusters</TabsTrigger>
-              <TabsTrigger value="analyzer">Analyzer</TabsTrigger>
-              <TabsTrigger value="tasks">Tasks</TabsTrigger>
-              <TabsTrigger value="pagespeed">Speed</TabsTrigger>
-              <TabsTrigger value="competitors">Competitors</TabsTrigger>
-              <TabsTrigger value="briefs">Briefs</TabsTrigger>
-              <TabsTrigger value="sync">Sync</TabsTrigger>
-              <TabsTrigger value="ai">AI</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="connect">
-              <div className="space-y-6">
+      <ProjectLayout
+        projectId={project.id}
+        projectName={project.name}
+        projectDomain={project.domain}
+      >
+        <Routes>
+          <Route index element={<ProjectDashboard projectId={project.id} />} />
+          <Route
+            path="connect"
+            element={
+              <div className="p-8 space-y-6">
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">GSC Connection</h2>
+                  <p className="text-muted-foreground">
+                    Connect and manage your Google Search Console integration
+                  </p>
+                </div>
                 <GscConnector projectId={project.id} />
                 <GscActionizer projectId={project.id} />
               </div>
-            </TabsContent>
-
-            <TabsContent value="analytics">
-              <AnalyticsDashboard projectId={project.id} />
-            </TabsContent>
-
-            <TabsContent value="clusters">
-              <KeywordClusters projectId={project.id} />
-            </TabsContent>
-
-            <TabsContent value="analyzer">
-              <GscActionizer projectId={project.id} />
-            </TabsContent>
-
-            <TabsContent value="tasks">
-              <TaskManager projectId={project.id} />
-            </TabsContent>
-
-            <TabsContent value="pagespeed">
-              <div className="space-y-6">
+            }
+          />
+          <Route
+            path="analytics"
+            element={
+              <div className="p-8 space-y-6">
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">Analytics</h2>
+                  <p className="text-muted-foreground">
+                    View and analyze your search performance data
+                  </p>
+                </div>
+                <AnalyticsDashboard projectId={project.id} />
+              </div>
+            }
+          />
+          <Route
+            path="keywords"
+            element={
+              <div className="p-8 space-y-6">
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">Keyword Clusters</h2>
+                  <p className="text-muted-foreground">
+                    Group and analyze your keywords by topic
+                  </p>
+                </div>
+                <KeywordClusters projectId={project.id} />
+              </div>
+            }
+          />
+          <Route
+            path="pagespeed"
+            element={
+              <div className="p-8 space-y-6">
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">Page Speed</h2>
+                  <p className="text-muted-foreground">
+                    Analyze and monitor your page performance metrics
+                  </p>
+                </div>
                 <AutoPageSpeed projectId={project.id} domain={project.domain} />
                 <PageSpeedAnalyzer projectId={project.id} domain={project.domain} />
               </div>
-            </TabsContent>
-
-            <TabsContent value="competitors">
-              <CompetitorAnalysis projectId={project.id} />
-            </TabsContent>
-
-            <TabsContent value="briefs">
-              <ContentBriefGenerator projectId={project.id} />
-            </TabsContent>
-
-            <TabsContent value="sync">
-              <AutoSync projectId={project.id} />
-            </TabsContent>
-
-            <TabsContent value="ai">
-              <AiAssistant projectId={project.id} />
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
+            }
+          />
+          <Route
+            path="competitors"
+            element={
+              <div className="p-8 space-y-6">
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">Competitor Analysis</h2>
+                  <p className="text-muted-foreground">
+                    Track and analyze your competitors
+                  </p>
+                </div>
+                <CompetitorAnalysis projectId={project.id} />
+              </div>
+            }
+          />
+          <Route
+            path="briefs"
+            element={
+              <div className="p-8 space-y-6">
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">Content Briefs</h2>
+                  <p className="text-muted-foreground">
+                    Generate AI-powered content briefs for your keywords
+                  </p>
+                </div>
+                <ContentBriefGenerator projectId={project.id} />
+              </div>
+            }
+          />
+          <Route
+            path="tasks"
+            element={
+              <div className="p-8 space-y-6">
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">Task Manager</h2>
+                  <p className="text-muted-foreground">
+                    Track and manage your SEO optimization tasks
+                  </p>
+                </div>
+                <TaskManager projectId={project.id} />
+              </div>
+            }
+          />
+          <Route
+            path="sync"
+            element={
+              <div className="p-8 space-y-6">
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">Auto Sync</h2>
+                  <p className="text-muted-foreground">
+                    Configure automatic data synchronization
+                  </p>
+                </div>
+                <AutoSync projectId={project.id} />
+              </div>
+            }
+          />
+          <Route
+            path="ai"
+            element={
+              <div className="p-8 space-y-6">
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">AI Assistant</h2>
+                  <p className="text-muted-foreground">
+                    Get AI-powered SEO recommendations and insights
+                  </p>
+                </div>
+                <AiAssistant projectId={project.id} />
+              </div>
+            }
+          />
+          <Route
+            path="settings"
+            element={<ProjectSettings projectId={project.id} projectName={project.name} />}
+          />
+        </Routes>
+      </ProjectLayout>
     </AuthGuard>
   );
 };

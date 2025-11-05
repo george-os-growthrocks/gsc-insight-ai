@@ -21,8 +21,18 @@ export const GscConnector = ({ projectId }: Props) => {
   const [propertyUrl, setPropertyUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
+  // Default to last 28 days (with 3 day delay for GSC data availability)
+  const getDefaultDates = () => {
+    const today = new Date();
+    const end = new Date(today);
+    end.setDate(end.getDate() - 3); // GSC has ~3 day delay
+    const start = new Date(end);
+    start.setDate(start.getDate() - 28);
+    return { start, end };
+  };
+  const defaultDates = getDefaultDates();
+  const [startDate, setStartDate] = useState<Date>(defaultDates.start);
+  const [endDate, setEndDate] = useState<Date>(defaultDates.end);
   const [pendingConnection, setPendingConnection] = useState<any>(null);
   const [selectedProperty, setSelectedProperty] = useState("");
 

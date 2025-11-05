@@ -22,7 +22,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/project/:id" element={<Project />} />
+          <Route path="/project/:id/*" element={<Project />} />
           <Route path="/gsc-callback" element={<GscCallback />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

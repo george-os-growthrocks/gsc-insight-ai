@@ -12,7 +12,35 @@ serve(async (req) => {
   }
 
   try {
-    const { projectId, startDate, endDate, rowLimit = 25000 } = await req.json();
+    let { projectId, startDate, endDate, rowLimit = 25000 } = await req.json();
+
+    // Validate dates - ensure they're not in the future and in correct format
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Default to last 28 days if dates not provided or invalid
+    if (!endDate) {
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 3); // GSC data has ~3 day delay
+      endDate = yesterday.toISOString().split('T')[0];
+    }
+    
+    if (!startDate) {
+      const pastDate = new Date(today);
+      pastDate.setDate(pastDate.getDate() - 31);
+      startDate = pastDate.toISOString().split('T')[0];
+    }
+
+    // Validate end date is not in the future
+    const endDateTime = new Date(endDate);
+    if (endDateTime > today) {
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 3);
+      endDate = yesterday.toISOString().split('T')[0];
+      console.log("End date adjusted to:", endDate);
+    }
+
+    console.log("Fetching GSC data for date range:", startDate, "to", endDate);
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);

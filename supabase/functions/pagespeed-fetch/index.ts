@@ -12,11 +12,23 @@ serve(async (req) => {
   }
 
   try {
-    const { url, strategy = "mobile", projectId } = await req.json();
+    let { url, strategy = "mobile", projectId } = await req.json();
     const PAGESPEED_API_KEY = Deno.env.get("PAGESPEED_API_KEY");
 
     if (!PAGESPEED_API_KEY) {
       throw new Error("PAGESPEED_API_KEY is not configured");
+    }
+
+    // Normalize URL - add https:// if no protocol specified
+    if (url && !url.match(/^https?:\/\//i)) {
+      url = `https://${url}`;
+    }
+
+    // Validate URL format
+    try {
+      new URL(url);
+    } catch (e) {
+      throw new Error("Invalid URL format. Please provide a valid URL.");
     }
 
     console.log("Fetching PageSpeed metrics for:", url, strategy);
