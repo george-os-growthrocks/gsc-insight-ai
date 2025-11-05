@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { action, code, projectId, userId, propertyUrl, redirectUri } = await req.json();
+    const { action, code, projectId, userId, propertyUrl, redirectUri, accessToken, refreshToken, expiresIn } = await req.json();
     const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
     const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET");
 
@@ -107,8 +107,7 @@ serve(async (req) => {
 
     if (action === "save_connection") {
       // Save the selected property connection
-      const { accessToken, refreshToken, expiresIn } = await req.json();
-      const expiresAt = new Date(Date.now() + expiresIn * 1000);
+      const expiresAt = new Date(Date.now() + Number(expiresIn) * 1000);
 
       const { error: insertError } = await supabase.from("google_tokens").insert([
         {
