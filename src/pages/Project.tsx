@@ -82,7 +82,7 @@ const Project = () => {
         projectDomain={project.domain}
       >
         <Routes>
-          <Route index element={<ProjectDashboard projectId={project.id} />} />
+          <Route index element={<ProjectDashboard projectId={project.id} projectName={project.name} projectDomain={project.domain} />} />
           <Route
             path="ai-insights"
             element={

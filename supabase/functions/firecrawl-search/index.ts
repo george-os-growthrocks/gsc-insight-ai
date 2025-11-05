@@ -25,7 +25,7 @@ serve(async (req) => {
 
     console.log(`Searching SERP for query: ${query}`);
 
-    // Call Firecrawl v2 search endpoint
+    // Call Firecrawl v2 search endpoint with proper error handling
     const searchResponse = await fetch("https://api.firecrawl.dev/v2/search", {
       method: "POST",
       headers: {
@@ -34,25 +34,27 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         query,
-        sources: ["web"],
-        categories: [],
         limit,
-        scrapeOptions: {
-          onlyMainContent: false,
-          maxAge: 172800000,
-          parsers: ["pdf"],
-          formats: ["markdown"],
-        },
       }),
     });
 
     if (!searchResponse.ok) {
       const errorText = await searchResponse.text();
-      console.error("Firecrawl search error:", searchResponse.status, errorText);
-      throw new Error(`Firecrawl search error: ${searchResponse.status}`);
+      console.error("Firecrawl search API error:", searchResponse.status, errorText);
+      
+      let errorMessage = `Firecrawl search error (${searchResponse.status})`;
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.error || errorJson.message || errorMessage;
+      } catch (e) {
+        errorMessage = errorText || errorMessage;
+      }
+      
+      throw new Error(errorMessage);
     }
 
     const searchData = await searchResponse.json();
+    console.log(`Search response:`, JSON.stringify(searchData).substring(0, 200));
     console.log(`Found ${searchData.data?.length || 0} SERP results`);
 
     // Save SERP results to database

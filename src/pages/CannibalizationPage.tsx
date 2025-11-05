@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -71,6 +72,8 @@ export default function CannibalizationPage({ projectId }: Props) {
   const [actionPlanDialog, setActionPlanDialog] = useState(false);
   const [expandedClusters, setExpandedClusters] = useState<Set<string>>(new Set());
   const [addingTask, setAddingTask] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(50);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -298,6 +301,12 @@ export default function CannibalizationPage({ projectId }: Props) {
     };
   }, [clusters]);
 
+  const paginatedClusters = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return clusters.slice(startIndex, endIndex);
+  }, [clusters, currentPage, itemsPerPage]);
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -409,7 +418,7 @@ export default function CannibalizationPage({ projectId }: Props) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {clusters.map((cluster) => (
+                  {paginatedClusters.map((cluster) => (
                     <Collapsible
                       key={cluster.id}
                       open={expandedClusters.has(cluster.id)}
@@ -539,6 +548,55 @@ export default function CannibalizationPage({ projectId }: Props) {
                 </TableBody>
               </Table>
             </div>
+            {/* Pagination Controls */}
+            {clusters.length > 0 && (
+              <div className="flex items-center justify-between px-4 py-4 border-t">
+                <div className="flex items-center gap-4">
+                  <p className="text-sm text-muted-foreground">
+                    Showing {((currentPage - 1) * itemsPerPage) + 1} to{" "}
+                    {Math.min(currentPage * itemsPerPage, clusters.length)} of{" "}
+                    {clusters.length} issues
+                  </p>
+                  <Select
+                    value={itemsPerPage.toString()}
+                    onValueChange={(value) => {
+                      setItemsPerPage(Number(value));
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="25">25 / page</SelectItem>
+                      <SelectItem value="50">50 / page</SelectItem>
+                      <SelectItem value="100">100 / page</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm">
+                    Page {currentPage} of {Math.ceil(clusters.length / itemsPerPage)}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.min(Math.ceil(clusters.length / itemsPerPage), currentPage + 1))}
+                    disabled={currentPage >= Math.ceil(clusters.length / itemsPerPage)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

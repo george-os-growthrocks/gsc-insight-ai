@@ -25,7 +25,7 @@ serve(async (req) => {
 
     console.log(`Scraping URL: ${url}`);
 
-    // Call Firecrawl v2 scrape endpoint
+    // Call Firecrawl v2 scrape endpoint with proper error handling
     const scrapeResponse = await fetch("https://api.firecrawl.dev/v2/scrape", {
       method: "POST",
       headers: {
@@ -34,27 +34,33 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         url,
-        onlyMainContent: false,
-        maxAge: 172800000,
-        parsers: ["pdf"],
         formats: ["markdown", "html"],
       }),
     });
 
     if (!scrapeResponse.ok) {
       const errorText = await scrapeResponse.text();
-      console.error("Firecrawl error:", scrapeResponse.status, errorText);
-      throw new Error(`Firecrawl error: ${scrapeResponse.status}`);
+      console.error("Firecrawl API error:", scrapeResponse.status, errorText);
+      
+      let errorMessage = `Firecrawl API error (${scrapeResponse.status})`;
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.error || errorJson.message || errorMessage;
+      } catch (e) {
+        errorMessage = errorText || errorMessage;
+      }
+      
+      throw new Error(errorMessage);
     }
 
     const scrapeData = await scrapeResponse.json();
-    console.log("Scrape successful");
+    console.log("Scrape response:", JSON.stringify(scrapeData).substring(0, 200));
 
-    // Extract content
-    const markdown = scrapeData.data?.markdown || "";
-    const html = scrapeData.data?.html || "";
-    const metadata = scrapeData.data?.metadata || {};
-    const wordCount = markdown.split(/\s+/).length;
+    // Extract content - handle different response formats
+    const markdown = scrapeData.data?.markdown || scrapeData.markdown || "";
+    const html = scrapeData.data?.html || scrapeData.html || "";
+    const metadata = scrapeData.data?.metadata || scrapeData.metadata || {};
+    const wordCount = markdown ? markdown.split(/\s+/).filter(Boolean).length : 0;
 
     // Save to database
     const supabaseClient = createClient(

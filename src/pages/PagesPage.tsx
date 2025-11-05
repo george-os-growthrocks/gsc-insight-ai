@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -66,6 +67,8 @@ export default function PagesPage({ projectId }: Props) {
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [expandedPages, setExpandedPages] = useState<Set<string>>(new Set());
   const [addingTask, setAddingTask] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(50);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -176,6 +179,12 @@ export default function PagesPage({ projectId }: Props) {
 
     return sorted;
   }, [pages, sortField, sortDirection]);
+
+  const paginatedPages = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return sortedPages.slice(startIndex, endIndex);
+  }, [sortedPages, currentPage, itemsPerPage]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -436,7 +445,7 @@ export default function PagesPage({ projectId }: Props) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedPages.map((page) => (
+                  {paginatedPages.map((page) => (
                     <Collapsible
                       key={page.id}
                       open={expandedPages.has(page.page_url)}
@@ -552,6 +561,56 @@ export default function PagesPage({ projectId }: Props) {
                 </TableBody>
               </Table>
             </div>
+            {/* Pagination Controls */}
+            {pages.length > 0 && (
+              <div className="flex items-center justify-between px-4 py-4 border-t">
+                <div className="flex items-center gap-4">
+                  <p className="text-sm text-muted-foreground">
+                    Showing {((currentPage - 1) * itemsPerPage) + 1} to{" "}
+                    {Math.min(currentPage * itemsPerPage, sortedPages.length)} of{" "}
+                    {sortedPages.length} pages
+                  </p>
+                  <Select
+                    value={itemsPerPage.toString()}
+                    onValueChange={(value) => {
+                      setItemsPerPage(Number(value));
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="25">25 / page</SelectItem>
+                      <SelectItem value="50">50 / page</SelectItem>
+                      <SelectItem value="100">100 / page</SelectItem>
+                      <SelectItem value="500">500 / page</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm">
+                    Page {currentPage} of {Math.ceil(sortedPages.length / itemsPerPage)}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.min(Math.ceil(sortedPages.length / itemsPerPage), currentPage + 1))}
+                    disabled={currentPage >= Math.ceil(sortedPages.length / itemsPerPage)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

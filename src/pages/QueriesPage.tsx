@@ -26,6 +26,7 @@ import {
   Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Collapsible,
   CollapsibleContent,
@@ -73,6 +74,8 @@ export default function QueriesPage({ projectId }: Props) {
   const [sortField, setSortField] = useState<SortField>("totalImpressions");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [expandedQueries, setExpandedQueries] = useState<Set<string>>(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(50);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -280,6 +283,13 @@ export default function QueriesPage({ projectId }: Props) {
     }
   };
 
+  // Pagination
+  const paginatedQueries = (queries: QueryGroup[]) => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return queries.slice(startIndex, endIndex);
+  };
+
   const stats = useMemo(() => {
     return {
       totalQueries: groupedQueries.length,
@@ -417,7 +427,7 @@ export default function QueriesPage({ projectId }: Props) {
 
         {["all", "new-opportunities", "lost-opportunities", "low-hanging-fruit", "top-3", "top-10", "outside-top-10"].map(
           (tab) => (
-            <TabsContent key={tab} value={tab} className="mt-4">
+            <TabsContent key={tab} value={tab} className="mt-4" onFocus={() => setCurrentPage(1)}>
               <Card>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
@@ -448,14 +458,14 @@ export default function QueriesPage({ projectId }: Props) {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {getFilteredByTab(tab).length === 0 ? (
+                        {paginatedQueries(getFilteredByTab(tab)).length === 0 ? (
                           <TableRow>
                             <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                               No queries found for this filter
                             </TableCell>
                           </TableRow>
                         ) : (
-                          getFilteredByTab(tab).map((query) => (
+                          paginatedQueries(getFilteredByTab(tab)).map((query) => (
                             <Collapsible
                               key={query.query}
                               open={expandedQueries.has(query.query)}
@@ -521,6 +531,56 @@ export default function QueriesPage({ projectId }: Props) {
                       </TableBody>
                     </Table>
                   </div>
+                  {/* Pagination Controls */}
+                  {getFilteredByTab(tab).length > 0 && (
+                    <div className="flex items-center justify-between px-4 py-4 border-t">
+                      <div className="flex items-center gap-4">
+                        <p className="text-sm text-muted-foreground">
+                          Showing {((currentPage - 1) * itemsPerPage) + 1} to{" "}
+                          {Math.min(currentPage * itemsPerPage, getFilteredByTab(tab).length)} of{" "}
+                          {getFilteredByTab(tab).length} queries
+                        </p>
+                        <Select
+                          value={itemsPerPage.toString()}
+                          onValueChange={(value) => {
+                            setItemsPerPage(Number(value));
+                            setCurrentPage(1);
+                          }}
+                        >
+                          <SelectTrigger className="w-[100px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="25">25 / page</SelectItem>
+                            <SelectItem value="50">50 / page</SelectItem>
+                            <SelectItem value="100">100 / page</SelectItem>
+                            <SelectItem value="500">500 / page</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                          disabled={currentPage === 1}
+                        >
+                          Previous
+                        </Button>
+                        <span className="text-sm">
+                          Page {currentPage} of {Math.ceil(getFilteredByTab(tab).length / itemsPerPage)}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(Math.min(Math.ceil(getFilteredByTab(tab).length / itemsPerPage), currentPage + 1))}
+                          disabled={currentPage >= Math.ceil(getFilteredByTab(tab).length / itemsPerPage)}
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>

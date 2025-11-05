@@ -2,13 +2,16 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, TrendingUp, Eye, MousePointerClick } from "lucide-react";
+import { Activity, TrendingUp, Eye, MousePointerClick, FileText } from "lucide-react";
+import { ExportReport } from "@/components/ExportReport";
 
 interface Props {
   projectId: string;
+  projectName?: string;
+  projectDomain?: string | null;
 }
 
-export const ProjectDashboard = ({ projectId }: Props) => {
+export const ProjectDashboard = ({ projectId, projectName = "My Project", projectDomain = null }: Props) => {
   const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalQueries: 0,
@@ -91,9 +94,16 @@ export const ProjectDashboard = ({ projectId }: Props) => {
 
   return (
     <div className="p-8 space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold mb-2">Dashboard</h2>
-        <p className="text-muted-foreground">Overview of your SEO performance</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold mb-2">Dashboard</h2>
+          <p className="text-muted-foreground">Overview of your SEO performance</p>
+        </div>
+        <ExportReport 
+          projectId={projectId}
+          projectName={projectName}
+          projectDomain={projectDomain}
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
