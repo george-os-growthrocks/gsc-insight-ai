@@ -74,19 +74,27 @@ export default function AiInsights({ projectId }: Props) {
         body: { projectId },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Function invocation error:", error);
+        throw new Error(error.message || "Failed to invoke insights function");
+      }
+
+      if (!data) {
+        throw new Error("No data returned from insights function");
+      }
 
       toast({
         title: "Success",
-        description: `Generated ${data.count} AI-powered insights`,
+        description: `Generated ${data.count || 0} AI-powered insights`,
       });
 
       fetchInsights();
     } catch (error) {
       console.error("Error generating insights:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate insights";
       toast({
-        title: "Error",
-        description: "Failed to generate insights",
+        title: "Error Generating Insights",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

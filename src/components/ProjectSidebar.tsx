@@ -20,11 +20,13 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import logo from "@/assets/logo.png";
 
 interface Props {
   projectId: string;
@@ -68,6 +70,18 @@ export const ProjectSidebar = ({ projectId }: Props) => {
 
   return (
     <Sidebar collapsible="icon" className="border-r">
+      <SidebarHeader className="border-b px-4 py-3">
+        <div className="flex items-center gap-3">
+          <img src={logo} alt="Logo" className="h-8 w-8 flex-shrink-0" />
+          {open && (
+            <div className="flex flex-col">
+              <span className="font-bold text-base leading-tight">GrowthHackers</span>
+              <span className="text-xs text-muted-foreground">SearchOps</span>
+            </div>
+          )}
+        </div>
+      </SidebarHeader>
+      
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Project</SidebarGroupLabel>

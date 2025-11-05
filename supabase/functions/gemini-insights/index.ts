@@ -141,7 +141,6 @@ Provide 8-12 insights with specific calculations.`;
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        temperature: 0.4,
         max_tokens: 16384,
       }),
     });
@@ -149,17 +148,29 @@ Provide 8-12 insights with specific calculations.`;
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error("AI Gateway error:", aiResponse.status, errorText);
-      throw new Error(`AI Gateway error: ${aiResponse.status}`);
+      
+      if (aiResponse.status === 429) {
+        throw new Error("Rate limit exceeded. Please try again later.");
+      }
+      if (aiResponse.status === 402) {
+        throw new Error("Payment required. Please add credits to your Lovable AI workspace.");
+      }
+      
+      throw new Error(`AI Gateway error (${aiResponse.status}): ${errorText}`);
     }
 
     const aiData = await aiResponse.json();
+    console.log("AI response structure:", JSON.stringify(aiData).substring(0, 200));
+    
     const aiContent = aiData.choices?.[0]?.message?.content;
 
     if (!aiContent) {
-      throw new Error("No content from AI");
+      console.error("No content from AI. Full response:", JSON.stringify(aiData));
+      throw new Error("No content from AI response");
     }
 
     console.log("Received AI response, parsing insights...");
+    console.log("AI Content preview:", aiContent.substring(0, 300));
 
     // Parse JSON from AI response
     let insights = [];
