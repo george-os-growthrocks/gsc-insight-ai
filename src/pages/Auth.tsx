@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { Search } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -65,13 +66,13 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted p-4">
       <Card className="w-full max-w-md shadow-elevated">
         <CardHeader className="space-y-1 text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Search className="h-8 w-8 text-primary" />
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <img src={logo} alt="GrowthHackers SearchOps" className="h-10 w-10" />
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              SEO Actionizer
+              GrowthHackers SearchOps
             </h1>
           </div>
-          <CardDescription>Actionable SEO insights from your GSC data</CardDescription>
+          <CardDescription>Advanced SEO analytics and growth optimization</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">

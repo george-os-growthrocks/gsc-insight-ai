@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { AuthGuard } from "@/components/AuthGuard";
 import { Plus, FolderOpen, LogOut, Search } from "lucide-react";
+import logo from "@/assets/logo.png";
 import {
   Dialog,
   DialogContent,
@@ -100,10 +101,10 @@ const Dashboard = () => {
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
         <div className="border-b bg-card">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Search className="h-6 w-6 text-primary" />
+            <div className="flex items-center gap-3">
+              <img src={logo} alt="GrowthHackers SearchOps" className="h-8 w-8" />
               <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                SEO Actionizer
+                GrowthHackers SearchOps
               </h1>
             </div>
             <Button variant="outline" size="sm" onClick={handleSignOut}>

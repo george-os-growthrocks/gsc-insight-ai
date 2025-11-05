@@ -11,6 +11,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import logo from "@/assets/logo.png";
 
 interface Props {
   projectName: string;
@@ -40,7 +41,7 @@ export const ProjectHeader = ({ projectName, projectDomain }: Props) => {
       </Button>
       
       <div className="flex items-center gap-2 flex-1 min-w-0">
-        <Search className="h-5 w-5 text-primary flex-shrink-0" />
+        <img src={logo} alt="" className="h-5 w-5 flex-shrink-0" />
         <div className="flex items-center gap-2 min-w-0">
           <h1 className="text-lg font-bold truncate">{projectName}</h1>
           {projectDomain && (
