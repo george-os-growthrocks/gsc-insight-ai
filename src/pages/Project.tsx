@@ -17,6 +17,7 @@ import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { CompetitorAnalysis } from "@/components/CompetitorAnalysis";
 import { ContentBriefGenerator } from "@/components/ContentBriefGenerator";
 import AiInsights from "@/pages/AiInsights";
+import QueriesPage from "@/pages/QueriesPage";
 import { useToast } from "@/components/ui/use-toast";
 
 interface Project {
@@ -113,6 +114,14 @@ const Project = () => {
                   </p>
                 </div>
                 <AnalyticsDashboard projectId={project.id} />
+              </div>
+            }
+          />
+          <Route
+            path="queries"
+            element={
+              <div className="p-8">
+                <QueriesPage projectId={project.id} />
               </div>
             }
           />
