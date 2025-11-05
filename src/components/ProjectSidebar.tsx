@@ -33,6 +33,7 @@ const navItems = [
   { title: "Dashboard", url: "", icon: LayoutDashboard },
   { title: "AI Insights", url: "/ai-insights", icon: Bot },
   { title: "Queries", url: "/queries", icon: Search },
+  { title: "Pages", url: "/pages", icon: FileText },
   { title: "GSC Connection", url: "/connect", icon: Link2 },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Keywords", url: "/keywords", icon: Hash },
