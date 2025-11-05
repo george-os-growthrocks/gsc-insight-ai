@@ -2,14 +2,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, Link2, Download, CheckCircle2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { format, subDays, startOfDay } from "date-fns";
+import { Link2, Download, CheckCircle2 } from "lucide-react";
+import { DateRangePicker, DateRange } from "@/components/DateRangePicker";
 
 interface Props {
   projectId: string;
@@ -22,17 +18,13 @@ export const GscConnector = ({ projectId }: Props) => {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
   // Default to last 28 days (with 3 day delay for GSC data availability)
-  const getDefaultDates = () => {
-    const today = new Date();
-    const end = new Date(today);
-    end.setDate(end.getDate() - 3); // GSC has ~3 day delay
-    const start = new Date(end);
-    start.setDate(start.getDate() - 28);
-    return { start, end };
+  const getDefaultRange = (): DateRange => {
+    const today = startOfDay(new Date());
+    const to = subDays(today, 3); // GSC has ~3 day delay
+    const from = subDays(to, 28);
+    return { from, to };
   };
-  const defaultDates = getDefaultDates();
-  const [startDate, setStartDate] = useState<Date>(defaultDates.start);
-  const [endDate, setEndDate] = useState<Date>(defaultDates.end);
+  const [dateRange, setDateRange] = useState<DateRange>(getDefaultRange());
   const [pendingConnection, setPendingConnection] = useState<any>(null);
   const [selectedProperty, setSelectedProperty] = useState("");
 
@@ -148,11 +140,11 @@ export const GscConnector = ({ projectId }: Props) => {
   };
 
   const handleFetchData = async () => {
-    if (!startDate || !endDate) {
+    if (!dateRange.from || !dateRange.to) {
       toast({
         variant: "destructive",
         title: "Date range required",
-        description: "Please select start and end dates",
+        description: "Please select a valid date range",
       });
       return;
     }
@@ -163,8 +155,8 @@ export const GscConnector = ({ projectId }: Props) => {
       const { data, error } = await supabase.functions.invoke("gsc-fetch-data", {
         body: {
           projectId,
-          startDate: format(startDate, "yyyy-MM-dd"),
-          endDate: format(endDate, "yyyy-MM-dd"),
+          startDate: format(dateRange.from, "yyyy-MM-dd"),
+          endDate: format(dateRange.to, "yyyy-MM-dd"),
         },
       });
 
@@ -238,48 +230,15 @@ export const GscConnector = ({ projectId }: Props) => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Start Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !startDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {startDate ? format(startDate, "PPP") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar mode="single" selected={startDate} onSelect={setStartDate} />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div>
-                <Label>End Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !endDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {endDate ? format(endDate, "PPP") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar mode="single" selected={endDate} onSelect={setEndDate} />
-                  </PopoverContent>
-                </Popover>
-              </div>
+            <div className="space-y-2">
+              <DateRangePicker
+                value={dateRange}
+                onChange={setDateRange}
+                mode="filter"
+              />
+              <p className="text-xs text-muted-foreground">
+                Selected: {format(dateRange.from, "MMM d, yyyy")} - {format(dateRange.to, "MMM d, yyyy")}
+              </p>
             </div>
 
             <Button onClick={handleFetchData} disabled={fetching} className="w-full">
