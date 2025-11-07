@@ -1,0 +1,531 @@
+============================================
+EDGE FUNCTIONS DOCUMENTATION
+============================================
+SEO Intelligence Platform - Supabase Edge Functions
+Generated: 2025-11-07
+============================================
+
+OVERVIEW
+--------
+This project contains 16 edge functions that power the SEO Intelligence Platform's backend operations, including Google Search Console integration, AI-powered insights, content analysis, and performance monitoring.
+
+============================================
+AUTHENTICATION & OAUTH
+============================================
+
+1. gsc-oauth
+   Purpose: Handles Google Search Console OAuth2 authentication flow
+   Actions:
+   - get_auth_url: Generates OAuth authorization URL
+   - exchange_code: Exchanges authorization code for access/refresh tokens
+   - save_connection: Saves selected GSC property connection to database
+   - refresh_token: Refreshes expired access tokens
+   
+   Parameters:
+   - action: string (get_auth_url | exchange_code | save_connection | refresh_token)
+   - code: string (for exchange_code)
+   - projectId: uuid
+   - userId: uuid
+   - propertyUrl: string (GSC property URL)
+   - redirectUri: string
+   
+   Required Secrets:
+   - GOOGLE_CLIENT_ID
+   - GOOGLE_CLIENT_SECRET
+   
+   Authentication: Public (verify_jwt = false)
+
+============================================
+DATA FETCHING & SYNCHRONIZATION
+============================================
+
+2. gsc-fetch-data
+   Purpose: Fetches Google Search Console data and stores in database
+   Features:
+   - Fetches query, page, and date dimensions
+   - Handles date range validation (prevents future dates)
+   - Batch inserts (1000 rows per batch)
+   - Automatic token refresh
+   - Clears old data before inserting new data
+   
+   Parameters:
+   - projectId: uuid (required)
+   - startDate: string (YYYY-MM-DD, defaults to 31 days ago)
+   - endDate: string (YYYY-MM-DD, defaults to 3 days ago)
+   - rowLimit: number (default: 25000)
+   
+   Returns:
+   - success: boolean
+   - rowsImported: number
+   - startDate: string
+   - endDate: string
+   
+   Authentication: Requires user auth
+
+============================================
+AI-POWERED INSIGHTS
+============================================
+
+3. gemini-insights
+   Purpose: Generates AI-powered SEO insights using Lovable AI (Gemini 2.5 Flash)
+   Features:
+   - Analyzes top 50 queries by impressions
+   - Generates 8-12 actionable insights
+   - Calculates traffic gain estimates
+   - Provides priority scores and effort levels
+   - Includes fallback algorithm if AI fails
+   
+   Insight Types:
+   - ctr_opportunity: Low CTR for top positions
+   - content_gap: Position 11-30 with optimization potential
+   - quick_win: Position 4-7, push to top 3
+   - cannibalization: Multiple pages for same query
+   - internal_linking: Link building opportunities
+   
+   Parameters:
+   - projectId: uuid (required)
+   
+   Returns:
+   - insights: array of insight objects
+   - count: number
+   
+   Required Secrets:
+   - LOVABLE_API_KEY
+   
+   Authentication: Requires user auth
+
+4. gemini-cannibalization
+   Purpose: Generates AI-powered action plans for keyword cannibalization resolution
+   Features:
+   - Creates step-by-step consolidation strategy
+   - Provides 301 redirect configuration code
+   - Includes content merger recommendations
+   - Calculates expected traffic gains
+   - Provides monitoring checklist
+   
+   Parameters:
+   - query: string (target keyword)
+   - primaryPage: string (page to keep)
+   - supportingPages: array (pages to redirect)
+   - metrics: object (performance data)
+   
+   Returns:
+   - actionPlan: string (detailed markdown action plan)
+   
+   Required Secrets:
+   - LOVABLE_API_KEY
+   
+   Authentication: Requires user auth
+
+5. seo-assistant
+   Purpose: AI chatbot for SEO advice and strategy
+   Features:
+   - Expert SEO consultant persona
+   - Context-aware responses
+   - Prioritizes actionable recommendations
+   - Handles rate limiting gracefully
+   
+   Parameters:
+   - messages: array (chat history)
+   - projectId: uuid
+   
+   Returns:
+   - response: string (AI response)
+   
+   Required Secrets:
+   - LOVABLE_API_KEY
+   
+   Authentication: Requires user auth
+
+============================================
+DATA ANALYSIS & PROCESSING
+============================================
+
+6. analyze-pages
+   Purpose: Analyzes page performance from GSC data
+   Features:
+   - Groups data by page URL
+   - Calculates performance scores (0-100)
+   - Aggregates click, impression, CTR, and position metrics
+   - Sorts queries by impressions
+   
+   Parameters:
+   - projectId: uuid (required)
+   
+   Returns:
+   - count: number
+   - pages: array of page analysis objects
+   
+   Scoring Formula:
+   - Position Score: max(0, 100 - position * 5) × 0.4
+   - CTR Score: min(100, ctr * 100 * 5) × 0.4
+   - Click Score: min(100, (clicks / 10) * 2) × 0.2
+   
+   Authentication: Requires user auth
+
+7. cluster-keywords
+   Purpose: Groups keywords into topical clusters using TF-IDF and cosine similarity
+   Features:
+   - Tokenizes and vectorizes queries
+   - Agglomerative clustering algorithm
+   - Limits to top 500 queries by impressions
+   - Generates cluster names from common words
+   - Calculates topic scores
+   
+   Parameters:
+   - projectId: uuid (required)
+   
+   Returns:
+   - success: boolean
+   - clustersFound: number
+   - clusters: array of cluster objects
+   
+   Cluster Object:
+   - cluster_name: string
+   - keywords: string[]
+   - topic_score: number
+   - avg_position: number
+   - total_impressions: number
+   - total_clicks: number
+   
+   Authentication: Public (verify_jwt = false)
+
+8. detect-cannibalization
+   Purpose: Detects keyword cannibalization issues
+   Features:
+   - Groups queries with multiple ranking pages
+   - Calculates cannibalization scores
+   - Identifies primary page vs supporting pages
+   - Estimates traffic gain from consolidation
+   - Calculates keyword difficulty
+   
+   Parameters:
+   - projectId: uuid (required)
+   - minImpressions: number (default: 50)
+   
+   Returns:
+   - count: number
+   - clusters: array (top 50 cannibalization issues)
+   
+   Cannibalization Score:
+   - Formula: (pages_count - 1) × (1 + variance / 10)
+   
+   Authentication: Requires user auth
+
+9. analyze-competitors
+   Purpose: Identifies keyword gaps and competitor opportunities
+   Features:
+   - Analyzes keywords ranking beyond position 10
+   - Identifies completely missing keywords (position > 50)
+   - Sorts by impression volume
+   - Provides opportunity descriptions
+   
+   Parameters:
+   - projectId: uuid (required)
+   
+   Returns:
+   - success: boolean
+   - gaps: array of keyword gap objects
+   
+   Gap Object:
+   - keyword: string
+   - yourPosition: number | null
+   - opportunity: string
+   - impressions: number
+   
+   Authentication: Public (verify_jwt = false)
+
+============================================
+CONTENT INTELLIGENCE & FIRECRAWL
+============================================
+
+10. firecrawl-scrape
+    Purpose: Scrapes a single page using Firecrawl API v2
+    Features:
+    - Extracts markdown and HTML content
+    - Calculates word count
+    - Stores metadata
+    - Saves to scraped_content table
+    
+    Parameters:
+    - url: string (required)
+    - projectId: uuid (required)
+    - query: string (optional, for context)
+    
+    Returns:
+    - success: boolean
+    - data: scraped content object
+    
+    Required Secrets:
+    - FIRECRAWL_API_KEY
+    
+    Authentication: Public (verify_jwt = false)
+
+11. firecrawl-search
+    Purpose: Performs SERP analysis using Firecrawl Search API
+    Features:
+    - Searches Google SERP for a query
+    - Retrieves top 10 results
+    - Extracts title, description, and markdown content
+    - Deletes old SERP results before inserting new ones
+    - Saves to serp_results table
+    
+    Parameters:
+    - query: string (required)
+    - projectId: uuid (required)
+    - limit: number (default: 10)
+    
+    Returns:
+    - success: boolean
+    - data: array of SERP results
+    - count: number
+    
+    Required Secrets:
+    - FIRECRAWL_API_KEY
+    
+    Authentication: Public (verify_jwt = false)
+
+12. firecrawl-crawl
+    Purpose: Crawls entire website or specific pages
+    Features:
+    - Supports single URL or entire domain crawl
+    - Configurable page limit
+    - Extracts markdown and HTML
+    - Async job support for large crawls
+    - Saves to scraped_content table
+    
+    Parameters:
+    - url: string (required, starting URL)
+    - projectId: uuid (required)
+    - crawlWholeDomain: boolean (default: false)
+    - pageLimit: number (default: 10)
+    
+    Returns:
+    - success: boolean
+    - data: array of crawled pages
+    - jobId: string (for async crawls)
+    
+    Required Secrets:
+    - FIRECRAWL_API_KEY
+    
+    Authentication: Public (verify_jwt = false)
+
+13. regenerate-content
+    Purpose: AI-powered content regeneration for SEO optimization
+    Features:
+    - Uses Lovable AI (Gemini 2.5 Flash)
+    - Analyzes competitor content
+    - Rewrites content for target keywords
+    - Calculates word count improvements
+    - Saves to content_regenerations table
+    
+    Parameters:
+    - originalUrl: string (required)
+    - targetQuery: string (required)
+    - originalContent: string (required)
+    - projectId: uuid (required)
+    - competitorUrls: string[] (optional)
+    
+    Returns:
+    - success: boolean
+    - regeneratedContent: string
+    - wordCountBefore: number
+    - wordCountAfter: number
+    - improvements: object
+    
+    Required Secrets:
+    - LOVABLE_API_KEY
+    
+    Authentication: Public (verify_jwt = false)
+
+14. analyze-page
+    Purpose: Single page SEO analysis using Firecrawl + AI
+    Features:
+    - Scrapes page content
+    - AI-powered SEO analysis
+    - Generates optimized title tags (3 options)
+    - Creates H1 recommendations
+    - Generates FAQ items
+    - Provides on-page SEO recommendations
+    
+    Parameters:
+    - url: string (required)
+    - query: string (required, target keyword)
+    
+    Returns:
+    - analysis: string (AI-generated analysis)
+    - pageContent: string (content preview)
+    
+    Required Secrets:
+    - FIRECRAWL_API_KEY
+    - LOVABLE_API_KEY
+    
+    Authentication: Public (verify_jwt = false)
+
+15. generate-content-brief
+    Purpose: Generates comprehensive content briefs for target keywords
+    Features:
+    - Uses Lovable AI (Gemini 2.5 Flash)
+    - Includes SEO-optimized title
+    - Structured outline with sections and subheadings
+    - Word count recommendations
+    - Competitor analysis integration
+    - Related keyword clustering
+    
+    Parameters:
+    - projectId: uuid (required)
+    - targetKeyword: string (required)
+    - clusterId: uuid (optional, for related keywords)
+    
+    Returns:
+    - success: boolean
+    - brief: object
+      - title: string
+      - outline: object (sections, subheadings, word counts)
+      - wordCount: number
+      - seoRecommendations: string
+      - competitorAnalysis: string
+    
+    Required Secrets:
+    - LOVABLE_API_KEY
+    
+    Authentication: Public (verify_jwt = false)
+
+============================================
+PERFORMANCE MONITORING
+============================================
+
+16. pagespeed-fetch
+    Purpose: Fetches PageSpeed Insights metrics using Google PageSpeed API
+    Features:
+    - Mobile and desktop strategies
+    - Core Web Vitals measurement
+    - Performance score calculation
+    - Automatic URL normalization
+    - Saves to pagespeed_metrics table
+    
+    Parameters:
+    - url: string (required)
+    - projectId: uuid (optional, for saving)
+    - strategy: string (mobile | desktop, default: mobile)
+    
+    Returns:
+    - success: boolean
+    - metrics: object
+      - performance_score: number (0-100)
+      - fcp: number (First Contentful Paint, ms)
+      - lcp: number (Largest Contentful Paint, ms)
+      - cls: number (Cumulative Layout Shift)
+      - tbt: number (Total Blocking Time, ms)
+      - si: number (Speed Index, ms)
+    - url: string
+    - strategy: string
+    
+    Required Secrets:
+    - PAGESPEED_API_KEY
+    
+    Authentication: Public (verify_jwt = false)
+
+============================================
+COMMON PATTERNS
+============================================
+
+CORS Headers (All Functions):
+- Access-Control-Allow-Origin: *
+- Access-Control-Allow-Headers: authorization, x-client-info, apikey, content-type
+- All functions handle OPTIONS preflight requests
+
+Error Handling:
+- All functions return JSON error responses
+- HTTP 500 for server errors
+- HTTP 400/401 for client errors
+- HTTP 429 for rate limiting
+- HTTP 402 for payment/credits required
+- Console logging for debugging
+
+Authentication Modes:
+- Public (verify_jwt = false): 11 functions
+  - Suitable for webhook-style or internal operations
+- Authenticated (verify_jwt = true): 5 functions
+  - Requires valid JWT token
+  - Uses Authorization header
+
+Database Operations:
+- Uses Supabase client with service role key
+- Batch inserts for large datasets
+- Delete-before-insert pattern for data refresh
+- Proper error handling and rollback
+
+AI Integration:
+- Uses Lovable AI Gateway (ai.gateway.lovable.dev)
+- Primary model: google/gemini-2.5-flash
+- Temperature: 0.4-0.7 depending on use case
+- Max tokens: 1500-16384 depending on complexity
+- Handles rate limiting and payment errors
+
+============================================
+DEPLOYMENT
+============================================
+
+All edge functions are deployed automatically via CI/CD.
+Configuration is stored in supabase/config.toml.
+
+No manual deployment steps required - functions are deployed
+when code is pushed to the repository.
+
+============================================
+MONITORING & DEBUGGING
+============================================
+
+Edge function logs can be viewed using the Lovable Cloud dashboard.
+
+Each function includes console.log statements for:
+- Request parameters
+- API call responses
+- Error conditions
+- Processing milestones
+
+To debug issues:
+1. Check edge function logs for error messages
+2. Verify required secrets are configured
+3. Test API endpoints individually
+4. Check database RLS policies if data access fails
+
+============================================
+SECRETS REQUIRED
+============================================
+
+The following secrets must be configured in Supabase:
+
+- GOOGLE_CLIENT_ID: Google OAuth client ID
+- GOOGLE_CLIENT_SECRET: Google OAuth client secret
+- LOVABLE_API_KEY: Lovable AI Gateway API key
+- FIRECRAWL_API_KEY: Firecrawl API key
+- PAGESPEED_API_KEY: Google PageSpeed Insights API key
+- SUPABASE_URL: Auto-configured by Lovable Cloud
+- SUPABASE_ANON_KEY: Auto-configured by Lovable Cloud
+- SUPABASE_SERVICE_ROLE_KEY: Auto-configured by Lovable Cloud
+
+============================================
+RATE LIMITS & QUOTAS
+============================================
+
+- Google Search Console API: 1,200 queries/minute
+- Firecrawl API: Varies by plan, watch for 429 errors
+- Lovable AI Gateway: Varies by credits, handles 429/402
+- PageSpeed Insights API: 25,000 queries/day
+
+============================================
+SECURITY CONSIDERATIONS
+============================================
+
+1. JWT Verification: Enabled for functions accessing user data
+2. RLS Policies: All database tables have Row-Level Security
+3. Service Role Key: Only used server-side in edge functions
+4. Secrets Management: All API keys stored in Supabase Vault
+5. CORS: Configured to allow frontend access
+6. Input Validation: All functions validate required parameters
+
+============================================
+END OF DOCUMENTATION
+============================================
