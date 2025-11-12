@@ -16,6 +16,7 @@ import { AutoSync } from "@/components/AutoSync";
 import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { CompetitorAnalysis } from "@/components/CompetitorAnalysis";
 import { ContentBriefGenerator } from "@/components/ContentBriefGenerator";
+import BacklinkIntelligence from "@/pages/BacklinkIntelligence";
 import AiInsights from "@/pages/AiInsights";
 import QueriesPage from "@/pages/QueriesPage";
 import PagesPage from "@/pages/PagesPage";
@@ -147,6 +148,10 @@ const Project = () => {
           <Route
             path="content-intelligence"
             element={<ContentIntelligence projectId={project.id} />}
+          />
+          <Route
+            path="backlinks"
+            element={<BacklinkIntelligence />}
           />
           <Route
             path="keywords"

@@ -47,3 +47,12 @@ verify_jwt = false
 
 [functions.regenerate-content]
 verify_jwt = false
+
+[functions.ga4-oauth]
+verify_jwt = false
+
+[functions.ga4-fetch-referral-traffic]
+verify_jwt = false
+
+[functions.analyze-backlink-intelligence]
+verify_jwt = false

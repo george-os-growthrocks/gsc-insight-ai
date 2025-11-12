@@ -74,6 +74,138 @@ export type Database = {
         }
         Relationships: []
       }
+      backlink_keyword_correlation: {
+        Row: {
+          analysis_date: string
+          clicks: number
+          created_at: string
+          ctr: number
+          id: string
+          impressions: number
+          landing_page: string
+          position: number
+          project_id: string
+          query: string
+          referring_domain: string
+        }
+        Insert: {
+          analysis_date: string
+          clicks?: number
+          created_at?: string
+          ctr?: number
+          id?: string
+          impressions?: number
+          landing_page: string
+          position?: number
+          project_id: string
+          query: string
+          referring_domain: string
+        }
+        Update: {
+          analysis_date?: string
+          clicks?: number
+          created_at?: string
+          ctr?: number
+          id?: string
+          impressions?: number
+          landing_page?: string
+          position?: number
+          project_id?: string
+          query?: string
+          referring_domain?: string
+        }
+        Relationships: []
+      }
+      backlink_traffic: {
+        Row: {
+          avg_session_duration: number | null
+          bounce_rate: number | null
+          created_at: string
+          date: string
+          engaged_sessions: number
+          id: string
+          landing_page: string
+          project_id: string
+          referring_domain: string
+          sessions: number
+        }
+        Insert: {
+          avg_session_duration?: number | null
+          bounce_rate?: number | null
+          created_at?: string
+          date: string
+          engaged_sessions?: number
+          id?: string
+          landing_page: string
+          project_id: string
+          referring_domain: string
+          sessions?: number
+        }
+        Update: {
+          avg_session_duration?: number | null
+          bounce_rate?: number | null
+          created_at?: string
+          date?: string
+          engaged_sessions?: number
+          id?: string
+          landing_page?: string
+          project_id?: string
+          referring_domain?: string
+          sessions?: number
+        }
+        Relationships: []
+      }
+      backlink_value_scores: {
+        Row: {
+          ai_insights: string | null
+          computed_at: string
+          created_at: string
+          id: string
+          keyword_relevance_score: number
+          landing_page: string
+          organic_impact_score: number
+          overall_value_score: number
+          position_improvement: number | null
+          project_id: string
+          referral_score: number
+          referring_domain: string
+          top_keywords: Json | null
+          traffic_contribution: number
+        }
+        Insert: {
+          ai_insights?: string | null
+          computed_at?: string
+          created_at?: string
+          id?: string
+          keyword_relevance_score?: number
+          landing_page: string
+          organic_impact_score?: number
+          overall_value_score?: number
+          position_improvement?: number | null
+          project_id: string
+          referral_score?: number
+          referring_domain: string
+          top_keywords?: Json | null
+          traffic_contribution?: number
+        }
+        Update: {
+          ai_insights?: string | null
+          computed_at?: string
+          created_at?: string
+          id?: string
+          keyword_relevance_score?: number
+          landing_page?: string
+          organic_impact_score?: number
+          overall_value_score?: number
+          position_improvement?: number | null
+          project_id?: string
+          referral_score?: number
+          referring_domain?: string
+          top_keywords?: Json | null
+          traffic_contribution?: number
+        }
+        Relationships: []
+      }
       cannibalization_clusters: {
         Row: {
           action_plan: string | null
@@ -256,6 +388,42 @@ export type Database = {
           target_query?: string
           word_count_after?: number | null
           word_count_before?: number | null
+        }
+        Relationships: []
+      }
+      ga4_tokens: {
+        Row: {
+          access_token: string
+          created_at: string
+          expires_at: string
+          id: string
+          project_id: string
+          property_id: string
+          refresh_token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          project_id: string
+          property_id: string
+          refresh_token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          project_id?: string
+          property_id?: string
+          refresh_token?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -573,6 +741,42 @@ export type Database = {
           name?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      referring_domains: {
+        Row: {
+          created_at: string
+          domain: string
+          first_seen: string
+          id: string
+          last_seen: string
+          project_id: string
+          status: string
+          total_engaged_sessions: number
+          total_sessions: number
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          first_seen?: string
+          id?: string
+          last_seen?: string
+          project_id: string
+          status?: string
+          total_engaged_sessions?: number
+          total_sessions?: number
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          first_seen?: string
+          id?: string
+          last_seen?: string
+          project_id?: string
+          status?: string
+          total_engaged_sessions?: number
+          total_sessions?: number
         }
         Relationships: []
       }

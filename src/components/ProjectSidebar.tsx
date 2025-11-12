@@ -40,6 +40,7 @@ const navItems = [
   { title: "Pages", url: "/pages", icon: FileText },
   { title: "Cannibalization", url: "/cannibalization", icon: AlertCircle },
   { title: "Content Intelligence", url: "/content-intelligence", icon: Microscope },
+  { title: "Backlink Intelligence", url: "/backlinks", icon: Link2 },
   { title: "GSC Connection", url: "/connect", icon: Link2 },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Keywords", url: "/keywords", icon: Hash },
